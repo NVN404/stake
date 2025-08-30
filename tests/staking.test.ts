@@ -1,14 +1,19 @@
 import * as anchor from "@project-serum/anchor";
 import { Program } from "@project-serum/anchor";
-import { Staking } from "../../target/types/staking";
+import { StakingProgram } from "../../target/types/staking_program";
 import { PublicKey, Keypair } from "@solana/web3.js";
-import { createMint, mintTo, getOrCreateAssociatedTokenAccount } from "@solana/spl-token";
+import {
+  createMint,
+  mintTo,
+  getOrCreateAssociatedTokenAccount,
+  TOKEN_PROGRAM_ID,
+} from "@solana/spl-token";
 import { expect } from "chai";
 
 describe("staking", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
-  const program = anchor.workspace.Staking as Program<Staking>;
+  const program = anchor.workspace.Staking as Program<StakingProgram>;
   const user = Keypair.generate();
   let mint: PublicKey;
   let userTokenAccount: PublicKey;
@@ -18,16 +23,13 @@ describe("staking", () => {
 
   before(async () => {
     // Airdrop SOL to user
-    await provider.connection.requestAirdrop(user.publicKey, 2 * anchor.web3.LAMPORTS_PER_SOL);
+    await provider.connection.requestAirdrop(
+      user.publicKey,
+      2 * anchor.web3.LAMPORTS_PER_SOL
+    );
 
     // Create mock SPL token
-    mint = await createMint(
-      provider.connection,
-      user,
-      user.publicKey,
-      null,
-      9
-    );
+    mint = await createMint(provider.connection, user, user.publicKey, null, 9);
 
     // Create user token account
     const userToken = await getOrCreateAssociatedTokenAccount(
@@ -78,7 +80,7 @@ describe("staking", () => {
         tokenMint: mint,
         vaultTokenAccount,
         systemProgram: anchor.web3.SystemProgram.programId,
-        tokenProgram: anchor.web3.TOKEN_PROGRAM_ID,
+        tokenProgram: TOKEN_PROGRAM_ID,
         rent: anchor.web3.SYSVAR_RENT_PUBKEY,
       })
       .signers([user])
@@ -98,16 +100,20 @@ describe("staking", () => {
         vault,
         vaultTokenAccount,
         userTokenAccount,
-        tokenProgram: anchor.web3.TOKEN_PROGRAM_ID,
+        tokenProgram: TOKEN_PROGRAM_ID,
         systemProgram: anchor.web3.SystemProgram.programId,
         rent: anchor.web3.SYSVAR_RENT_PUBKEY,
       })
       .signers([user])
       .rpc();
 
-    const stakingAccountData = await program.account.stakingAccount.fetch(stakingAccount);
+    const stakingAccountData = await program.account.stakingAccount.fetch(
+      stakingAccount
+    );
     expect(stakingAccountData.balance.toNumber()).to.equal(amount.toNumber());
-    expect(stakingAccountData.owner.toBase58()).to.equal(user.publicKey.toBase58());
+    expect(stakingAccountData.owner.toBase58()).to.equal(
+      user.publicKey.toBase58()
+    );
   });
 
   it("Withdraws tokens", async () => {
@@ -120,12 +126,14 @@ describe("staking", () => {
         vault,
         vaultTokenAccount,
         userTokenAccount,
-        tokenProgram: anchor.web3.TOKEN_PROGRAM_ID,
+        tokenProgram: TOKEN_PROGRAM_ID,
       })
       .signers([user])
       .rpc();
 
-    const stakingAccountData = await program.account.stakingAccount.fetch(stakingAccount);
+    const stakingAccountData = await program.account.stakingAccount.fetch(
+      stakingAccount
+    );
     expect(stakingAccountData.balance.toNumber()).to.equal(50 * 10 ** 9);
   });
 
@@ -140,7 +148,7 @@ describe("staking", () => {
           vault,
           vaultTokenAccount,
           userTokenAccount,
-          tokenProgram: anchor.web3.TOKEN_PROGRAM_ID,
+          tokenProgram: TOKEN_PROGRAM_ID,
         })
         .signers([user])
         .rpc();
