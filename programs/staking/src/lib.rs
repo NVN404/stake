@@ -1,21 +1,23 @@
 use anchor_lang::prelude::*;
-use staking::{deposit::Deposit, initialize::Initialize, withdraw::Withdraw};
+
+pub mod staking; // your folder with deposit.rs, initialize.rs, etc.
+use staking::*;
 
 declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 
 #[program]
-pub mod staking {
+pub mod staking_program {
     use super::*;
 
     pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        Initialize::initialize(ctx)
+        initialize(ctx) // call the function from initialize.rs
     }
 
     pub fn deposit(ctx: Context<Deposit>, amount: u64) -> Result<()> {
-        Deposit::deposit(ctx, amount)
+        deposit(ctx, amount)
     }
 
     pub fn withdraw(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
-        Withdraw::withdraw(ctx, amount)
+        withdraw(ctx, amount)
     }
 }
