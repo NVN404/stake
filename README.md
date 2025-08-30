@@ -131,9 +131,3 @@ Test coverage includes:
 MIT
 
 
-Overflow: Prevents arithmetic overflow in deposits.
-Underflow: Prevents withdrawing more than the staked balance.
-Unauthorized: Ensures only the staking account owner can withdraw.
-
-
-Safety: The init_if_needed in deposit.rs is safe due to unique seeds (signer.key() and vault.key()), preventing re-initialization attacks.
